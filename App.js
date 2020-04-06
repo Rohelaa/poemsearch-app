@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, FlatList } from 'react-native';
 import { Input, Button } from 'react-native-elements';
+import Poem from './components/Poem'
 
 export default function App() {
   const [searchWord, setSearchWord] = useState('')
   const [poems, setPoems] = useState([])
-  const [poem, setPoem] = useState('')
+  const [poem, setPoem] = useState(null)
   
   const fetchPoems = () => {
     fetch(`http://poetrydb.org/lines/${searchWord}`)
@@ -21,18 +22,29 @@ export default function App() {
 
 
   useEffect(() => {
-    console.log(Math.floor(Math.random() * poems.length + 1))
+    const index = Math.floor(Math.random() * poems.length + 1)
+    console.log(poems[index]);
+    
+    // setPoem(poems[index])
   }, [poems])
 
+  console.log(poem);
+  
   return (
     <View style={styles.container}>
+      <FlatList 
+        data={poems}
+        renderItem={({ item }) => (
+          <Text>{item.title}</Text>
+        )} />
+      
       <Input 
         onChangeText={text => setSearchWord(text)}
         value={searchWord} />  
       <Button 
         title='Search'
-        onPress={fetchPoems} />    
-      <Text>{poem}</Text>
+        onPress={fetchPoems} />  
+      
     </View>
   );
 }
