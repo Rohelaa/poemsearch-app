@@ -1,3 +1,7 @@
+if(__DEV__) {
+  import('./ReactotronConfig')
+    .then(() => console.log('Reactotron Configured'))
+}
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, FlatList } from 'react-native';
 import { Input, Button, ListItem } from 'react-native-elements';
