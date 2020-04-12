@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { View, FlatList } from 'react-native';
 import { Input, Button, ListItem } from 'react-native-elements';
-// import * as SQLite from "expo-sqlite";
-import SonnetButton from './SonnetButton';
+import * as SQLite from "expo-sqlite";
+// import SonnetButton from './SonnetButton';
 
-// const db = SQLite.openDatabase('sonnetdb.db')
-// console.log(db)
+const db = SQLite.openDatabase('sonnetdb.db')
+console.log(db)
 
 export default function SearchScreen({ navigation }) {
   const [searchWord, setSearchWord] = useState('')
   const [poems, setPoems] = useState([])
   // // const [sonnets, setSonnets] = useState([])
-  // const [sonnet, setSonnet] = useState(null)
+  const [sonnet, setSonnet] = useState(null)
   
   const fetchPoems = () => {
     fetch(`http://poetrydb.org/lines/${searchWord}`)
@@ -21,32 +21,48 @@ export default function SearchScreen({ navigation }) {
   }
 
   // palauttaa taulukosta satunnaisen olion
-  const getRandomItem = (array) => (
-    array[(Math.floor(Math.random() * array.length))]
-  )
+  const getRandomSonnet = (array) => {
+    let randomSonnet = array[(Math.floor(Math.random() * array.length))]
+    return randomSonnet
+  }
 
-  // const fetchSonnet = () => {
-  //   fetch('http://poetrydb.org/linecount/14')
-  //     .then(res => res.json())
-  //     .then(resData => {
-  //     // console.log(typeof resData)
-  //     // console.log('Sonnet of the day:', getRandomItem(resData))
-  //       setSonnet(getRandomItem(resData))
-  //     })
-  // }
+  // metodi, joka lisää olioon pvm propertyn
+  // käytännössä ihan toimiva
+  const addDateToObject = (object) => {
+    object.date = new Date()
+  }
 
-  // const navigateToSonnetScreen = () => {
-  //   db.transaction(tx => {
-  //     tx.executeSql('select * from sonnet', [], (_,{ rows }) => {
-  //       console.log(rows._array)
-  //       navigation.navigate('Poem', {
-  //         title: rows._array[13].title,
-  //         author: rows._array[13].author,
-  //         lines: rows._array[13].lines
-  //       })
-  //     })
-  //   })
-  // }
+  // propertyn lisäämisen testausta...
+  let testObject = { title: 'asd', author: 'asdasd'}
+
+  addDateToObject(testObject)
+  console.log(testObject);
+  
+
+  const fetchSonnet = () => {
+    fetch('http://poetrydb.org/linecount/14')
+      .then(res => res.json())
+      .then(resData => {
+      // console.log(typeof resData)
+      // console.log('Sonnet of the day:', getRandomItem(resData))
+        console.log('There should be a date here', addDateToObject(getRandomSonnet(resData)));
+        
+        setSonnet(getRandomSonnet(resData))
+      })
+  }
+
+  const navigateToSonnetScreen = () => {
+    db.transaction(tx => {
+      tx.executeSql('select * from sonnet', [], (_,{ rows }) => {
+        console.log(rows._array)
+        navigation.navigate('Poem', {
+          title: rows._array[1].title,
+          author: rows._array[1].author,
+          lines: rows._array[1].lines
+        })
+      })
+    })
+  }
 
   // muuttaa säetaulukon yhdeksi merkkijonoksi
   const linesArrayToString = (array) => {
@@ -57,24 +73,24 @@ export default function SearchScreen({ navigation }) {
     return LinesString
   }
 
-  // const saveItem = () => {
-  //   db.transaction(tx => {
-  //     tx.executeSql('insert into sonnet (title, author, lines) values (?, ?, ?)',
-  //       [
-  //         sonnet.title, 
-  //         sonnet.author, 
-  //         linesArrayToString(sonnet.lines)
-  //       ]
-  //     )
-  //   }, null, navigateToSonnetScreen
-  //   )
-  // }
+  const saveItem = () => {
+    db.transaction(tx => {
+      tx.executeSql('insert into sonnet (title, author, lines) values (?, ?, ?)',
+        [
+          sonnet.title, 
+          sonnet.author, 
+          linesArrayToString(sonnet.lines)
+        ]
+      )
+    }, null, navigateToSonnetScreen
+    )
+  }
 
   // luo tietokannan, jos sitä ei ole jo olemassa
   useEffect(() => {
     db.transaction(tx => {
       tx.executeSql(`create table if not exists sonnet 
-        (id integer primary key not null, title text, author text, lines text)`)
+        (id integer primary key not null, title text, author text, lines text, date text)`)
     })
   }, [])
 
@@ -90,9 +106,9 @@ export default function SearchScreen({ navigation }) {
   // }, [sonnet])
 
   // hakee sonetin ensimmäisen renderöinnin jälkeen
-  // useEffect(() => {
-  //   fetchSonnet()
-  // }, [])
+  useEffect(() => {
+    fetchSonnet()
+  }, [])
 
   return (
     <View style={{ flex: 1 }}>
@@ -116,10 +132,10 @@ export default function SearchScreen({ navigation }) {
       <Button 
         title='Search'
         onPress={fetchPoems} />  
-      <SonnetButton />
-      {/* <Button 
+      {/* <SonnetButton /> */}
+      <Button 
         title='Sonnet of the day'
-        onPress={saveItem} /> */}
+        onPress={saveItem} />
     </View>
   );
 }

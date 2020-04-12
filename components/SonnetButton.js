@@ -8,10 +8,24 @@ console.log(db)
 export default function SonnetButton({ navigation }) {
   const [sonnet, setSonnet] = useState(null)
 
+  console.log('props:', navigation);
+  
+
+  useEffect(() => {
+    db.transaction(tx => {
+      tx.executeSql(`create table if not exists sonnet 
+        (id integer primary key not null, title text, author text, lines text)`)
+    })
+  }, [])
+
   // fetchaus SearchScreenissä ja sonetti propsina tänne ??
   useEffect(() => {
     fetchSonnet()
   }, [])
+
+  const getRandomItem = (array) => (
+    array[(Math.floor(Math.random() * array.length))]
+  )
 
   const fetchSonnet = () => {
     fetch('http://poetrydb.org/linecount/14')
