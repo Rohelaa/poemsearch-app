@@ -52,8 +52,7 @@ export default function Poem({ route }) {
           utility.turnLinesArrayToString(poem.lines)
         ],
         (_, { rows }) => console.log(rows))
-    }, error => console.error(error)
-    )
+    }, error => console.error(error))
   }
     
   
@@ -61,37 +60,20 @@ export default function Poem({ route }) {
   // console.log(lines)
 
 
-  /** ehdollinen renderöinti, koska sonetin säkeet ovat taulukon sijaan merkkijonona */
-  if (typeof poem.lines === "string") {
-    return (
+  return (
     <ScrollView>
       <Text style={{ fontSize: 20 }}>{poem.title}</Text>
       <Text>{poem.author}</Text>
       <Text>{poem.lines}</Text>
       <Text>{poem.date}</Text>
-      <Button 
-        title='Add to favorites'
-          onPress={addToFavorites} />
+      {poem.hasOwnProperty('favorite') ? 
+        null
+        : <Button 
+            title='Add to favorites'
+            onPress={addToFavorites} />}
+      
     </ScrollView>
-    )
-  }
-  
-
-  return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={{ fontSize: 20, textAlign: "center" }}>{poem.title}</Text>
-      <Text style={{ textAlign: "center" }}>{poem.author}</Text>
-      <View style={{ marginLeft: 5 }}>
-        {poem.lines.map(line => (
-          <Text>{line}</Text>
-        ))}
-      </View>
-      <Button 
-        title='Add to favorites'
-          onPress={addToFavorites} />
-      {/* {lines} */}
-    </ScrollView>
-  )
+  ) 
 }
 
 const styles = StyleSheet.create({

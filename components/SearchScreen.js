@@ -4,6 +4,7 @@ import { Input, Button, ListItem } from 'react-native-elements';
 // import * as SQLite from "expo-sqlite";
 // // import SonnetButton from './SonnetButton';
 import database from "../db";
+import utility from "../utility";
 
 const db = database.db
 // console.log(db)
@@ -60,20 +61,19 @@ export default function SearchScreen({ navigation }) {
     //   console.log()
     // }
     db.transaction(tx => {
-      tx.executeSql('select * from sonnet', [], (_, { rows }) => {
+      tx.executeSql('select * from sonnet', [], async (_, { rows }) => {
         // console.log('90842348902384', rows)
 
         const sonnetInDb = rows._array[0]
         // const sonnetDateParsed = new Date(sonnetInDb.date)
         // console.log(sonnetDateParsed.getTime())
-        console.log(rows)
-        console.log(sonnetInDb)
+         console.log(rows)
+        // console.log(sonnetInDb)
 
         /* jos tietokanta on tyhjä, haetaan sonetti ja talletetaan
         komponentin tilaan */
-        if (rows.length === 0) {
-          fetchSonnetAsyncAwait()
-          saveSonnetToDb()
+        if (rows._array.length === 0) {
+          await fetchSonnet()
         // muulloin haetaan sonetti ensin tietokannasta
         } else {
           getSonnetFromDb()
@@ -114,6 +114,7 @@ export default function SearchScreen({ navigation }) {
     db.transaction(tx => {
       tx.executeSql('select * from sonnet', [], (_, { rows }) => {
         const sonnet = rows._array[0]
+        setSonnet(sonnet)
         console.log('sonnet currently in db: ', sonnet)
       })
     }, error => console.error(error))
@@ -143,6 +144,16 @@ export default function SearchScreen({ navigation }) {
   //     console.log(rows)
   //   })
   // })
+
+  const fetchSonnet = async () => {
+    const response = await fetch('http://poetrydb.org/linecount/14')
+    // myös tässä oltava await
+    const data = await response.json()
+    const randomSonnetWithDate = addDateToObject(getRandomSonnet(data))
+    console.log('There should be a date in this object', randomSonnetWithDate)
+
+    setSonnet(randomSonnetWithDate)
+  }
   
   const fetchPoems = () => {
     fetch(`http://poetrydb.org/lines/${searchWord}`)
@@ -171,36 +182,11 @@ export default function SearchScreen({ navigation }) {
 
   // addDateToObject(testObject)
   // console.log(testObject);
-  
-  const fetchSonnetAsyncAwait = async () => {
-    const response = await fetch('http://poetrydb.org/linecount/14')
-    // myös tässä oltava await
-    const data = await response.json()
-    const randomSonnetWithDate = addDateToObject(getRandomSonnet(data))
-    console.log('There should be a date in this object', randomSonnetWithDate)
-
-    setSonnet(randomSonnetWithDate)
-  } 
-
-  const fetchSonnet = () => {
-    fetch('http://poetrydb.org/linecount/14')
-      .then(res => res.json())
-      .then(resData => {
-        // console.log(typeof resData)
-        // console.log('Sonnet of the day:', getRandomItem(resData))
-        const sonnet = getRandomSonnet(resData)
-        const sonnetWithDate = addDateToObject(sonnet)
-        // oliossa ilmeisesti valmiina date-property, joten ei tarvetta lisätä itse
-        console.log('There should be a date in this object', sonnetWithDate);
-        
-        setSonnet(sonnetWithDate)
-      })
-  }
 
   const navigateToSonnetScreen = () => {
     db.transaction(tx => {
       tx.executeSql('select * from sonnet', [], (_,{ rows }) => {
-        console.log('sonnets currently in db: ', rows._array)
+        // console.log('sonnets currently in db: ', rows._array)
         navigation.navigate('Poem', {
           title: rows._array[0].title,
           author: rows._array[0].author,
@@ -212,13 +198,13 @@ export default function SearchScreen({ navigation }) {
   }
 
   // muuttaa säetaulukon yhdeksi merkkijonoksi
-  const linesArrayToString = (array) => {
-    let LinesString = ''
-    array.forEach(line => {
-      LinesString += line + '\n'
-    })
-    return LinesString
-  }
+  // const linesArrayToString = (array) => {
+  //   let LinesString = ''
+  //   array.forEach(line => {
+  //     LinesString += line + '\n'
+  //   })
+  //   return LinesString
+  // }
 
   /* poistaa tietokannassa olevan sonetin ja korvaa sen toisella
   nyt tekee edellämainitun, vaikka poistoa ei tarvitsisi tehdä */
@@ -229,7 +215,7 @@ export default function SearchScreen({ navigation }) {
         [
           sonnet.title, 
           sonnet.author, 
-          linesArrayToString(sonnet.lines),
+          sonnet.lines,
           sonnet.date.toString()
         ]
       )
@@ -255,16 +241,19 @@ export default function SearchScreen({ navigation }) {
         keyExtractor={(item, index) => index.toString()}
         data={poems}
         renderItem={({ item }) => (
+          // Muuttaa apumetodilla lines-taulukon merkkijonoksi
           <ListItem 
             onPress={() => navigation.navigate('Poem', {
               title: item.title,
               author: item.author,
-              lines: item.lines
+              lines: utility.turnLinesArrayToString(item.lines)
             })}
             title={item.title}
             chevron
             bottomDivider />
         )} />
+
+        {/* validointi lisättävä. Tyhjä syöte laukaisee nyt errorin  */}
       <Input 
         onChangeText={text => setSearchWord(text)}
         value={searchWord} />  
