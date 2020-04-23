@@ -8,22 +8,24 @@ import utility from '../utility'
 const db = database.db
 
 export default function Poem({ route }) {
-  console.log(route.params)
-  
   const [poem, setPoem] = useState(route.params)
+
+  console.log(poem.lines)
 
   // luo tietokantaan taulun suosikeille
   useEffect(() => {
     db.transaction(tx => {
       tx.executeSql(`create table if not exists favorite
         (id integer primary key not null, title text, author text, lines text)`)
-    }, null, () => console.log(db))
+    }, null, 
+    // () => console.log(db)
+    )
   }, [])
 
   useEffect(() => {
     db.transaction(tx => {
       tx.executeSql('select * from favorite', [], (_, { rows }) => {
-        console.log(rows)
+        // console.log('favorites: ', rows)
       })
     }, err => console.error(err))
   }, [])
@@ -36,12 +38,12 @@ export default function Poem({ route }) {
   //   })
   // })
 
-  const reducer = (accumulator, currentValue, currentIndex) => {
-    // console.log(accumulator)
-    return (
-      accumulator + currentValue
-    )
-  }
+  // const reducer = (accumulator, currentValue, currentIndex) => {
+  //   // console.log(accumulator)
+  //   return (
+  //     accumulator + currentValue
+  //   )
+  // }
 
   const addToFavorites = () => {
     db.transaction(tx => {
@@ -54,6 +56,9 @@ export default function Poem({ route }) {
         (_, { rows }) => console.log(rows))
     }, error => console.error(error))
   }
+
+  
+  
     
   
   // const lines = poem.lines.reduce(reducer)
@@ -64,14 +69,14 @@ export default function Poem({ route }) {
     <ScrollView>
       <Text style={{ fontSize: 20 }}>{poem.title}</Text>
       <Text>{poem.author}</Text>
-      <Text>{poem.lines}</Text>
+      {poem.lines.map(line => 
+        <Text>{line}</Text>)}
       <Text>{poem.date}</Text>
       {poem.hasOwnProperty('favorite') ? 
         null
         : <Button 
             title='Add to favorites'
             onPress={addToFavorites} />}
-      
     </ScrollView>
   ) 
 }
