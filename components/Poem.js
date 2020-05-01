@@ -10,8 +10,6 @@ const db = database.db
 export default function Poem({ route }) {
   const [poem, setPoem] = useState(route.params)
 
-  console.log(poem.lines)
-
   // luo tietokantaan taulun suosikeille
   useEffect(() => {
     db.transaction(tx => {
@@ -38,6 +36,7 @@ export default function Poem({ route }) {
   //   })
   // })
 
+  // kokeilua...
   // const reducer = (accumulator, currentValue, currentIndex) => {
   //   // console.log(accumulator)
   //   return (
@@ -57,20 +56,14 @@ export default function Poem({ route }) {
     }, error => console.error(error))
   }
 
+  // sonetti-olion lines-property on tietotyypiltään merkkijono
+  // sama pätee runoihin, jotka on lisätty suosikkeihin  
   
-  
-    
-  
-  // const lines = poem.lines.reduce(reducer)
-  // console.log(lines)
-
-
   return (
     <ScrollView>
       <Text style={{ fontSize: 20 }}>{poem.title}</Text>
       <Text>{poem.author}</Text>
-      {poem.lines.map(line => 
-        <Text>{line}</Text>)}
+      <Text>{poem.lines}</Text>
       <Text>{poem.date}</Text>
       {poem.hasOwnProperty('favorite') ? 
         null
@@ -78,8 +71,5 @@ export default function Poem({ route }) {
             title='Add to favorites'
             onPress={addToFavorites} />}
     </ScrollView>
-  ) 
+  )
 }
-
-const styles = StyleSheet.create({
-})

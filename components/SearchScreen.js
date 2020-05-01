@@ -13,6 +13,7 @@ export default function SearchScreen({ navigation }) {
   const [searchWord, setSearchWord] = useState('')
   const [poems, setPoems] = useState([])
   const [sonnet, setSonnet] = useState(null)
+  const [errorMsg, setErrorMsg] = useState(null)
 
   // luo tietokantaan taulun soneteille, jos sitä ei ole jo olemassa
   useEffect(() => {
@@ -230,7 +231,6 @@ export default function SearchScreen({ navigation }) {
 
   const fetchSonnet = async () => {
     const response = await fetch('http://poetrydb.org/linecount/14')
-    // myös tässä oltava await
     const data = await response.json()
     const randomSonnetWithDate = utility.addDateToObject(utility.getRandomObjectFromArray(data))
     console.log('There should be a date in this object: ', randomSonnetWithDate)
@@ -240,10 +240,14 @@ export default function SearchScreen({ navigation }) {
   
   // poikkeuksien hallinta puuttuu vielä, sama ylläolevassa metodissa
   const fetchPoems = async () => {
-    const response = await fetch(`http://poetrydb.org/lines/${searchWord}`)
-    const data = await response.json()
-
-    setPoems(data)
+    try {
+      const response = await fetch(`http://poetrydb.org/lines/${searchWord}`)
+      const data = await response.json()
+      setPoems(data)
+      setErrorMsg(null)
+    } catch (exception) {
+      setErrorMsg('Input not valid')
+    }
   }
 
   // hakee tietokannasta sonetin tiedot ja siirtyy 'Poem' näkymään 
@@ -301,7 +305,7 @@ export default function SearchScreen({ navigation }) {
             onPress={() => navigation.navigate('Poem', {
               title: item.title,
               author: item.author,
-              lines: item.lines
+              lines: utility.turnLinesArrayToString(item.lines)
             })}
             title={item.title}
             chevron
@@ -311,7 +315,8 @@ export default function SearchScreen({ navigation }) {
         {/* validointi lisättävä. Tyhjä syöte laukaisee nyt errorin  */}
       <Input 
         onChangeText={text => setSearchWord(text)}
-        value={searchWord} />  
+        value={searchWord} 
+        errorMessage={errorMsg}/>  
       <Button 
         title='Search'
         onPress={fetchPoems} />  

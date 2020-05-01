@@ -1,3 +1,6 @@
+// muuttaa säe-taulukon merkkijono muotoon
+// lisää jokaisen taulukon alkion jälkeen rivinvaihdon, jotta
+// säkeet renderöityvät oikein
 const turnLinesArrayToString = (array) => {
   let LinesString = ''
   array.forEach(line => {

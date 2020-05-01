@@ -23,6 +23,7 @@ export default function Favorites({ navigation }) {
   return (
     <View>
       <FlatList 
+        keyExtractor={(item, index) => index.toString()}
         data={favorites}
         renderItem={({ item }) => {
           console.log(item)
