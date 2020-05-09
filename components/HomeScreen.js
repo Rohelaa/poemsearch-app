@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { View, FlatList } from 'react-native';
-import { Input, Button, ListItem } from 'react-native-elements';
+import { View, FlatList, Keyboard, SafeAreaView } from 'react-native';
+import { Input, Button, ListItem, Header, Icon } from 'react-native-elements';
 // import * as SQLite from "expo-sqlite";
 // // import SonnetButton from './SonnetButton';
 import database from "../db";
 import utility from "../utility";
+// import { Drawer } from "native-base";
 
 const db = database.db
 // console.log(db)
 
-export default function SearchScreen({ navigation }) {
+export default function HomeScreen({ navigation }) {
   const [searchWord, setSearchWord] = useState('')
   const [poems, setPoems] = useState([])
   const [sonnet, setSonnet] = useState(null)
@@ -243,10 +244,25 @@ export default function SearchScreen({ navigation }) {
     try {
       const response = await fetch(`http://poetrydb.org/lines/${searchWord}`)
       const data = await response.json()
-      setPoems(data)
-      setErrorMsg(null)
+      console.log(data.status)
+
+      // jos haku ei löydä mitään, palautuu vastauksena olio jonka status kentän arvo on 404
+      if (data.status === 404) {
+        setErrorMsg(data.reason)
+        setTimeout(() => {
+          setErrorMsg(null)
+        }, 5000);
+      } else {
+        setPoems(data)
+        // piilottaa näppäimistön 
+        Keyboard.dismiss()
+      }
+
     } catch (exception) {
       setErrorMsg('Input not valid')
+      setTimeout(() => {
+        setErrorMsg(null)
+      }, 5000)
     }
   }
 
@@ -295,9 +311,33 @@ export default function SearchScreen({ navigation }) {
     }, error => console.error(error))
   }
 
+  const menuButton = () => (
+    <Icon 
+      name='menu'
+      onPress={() => navigation.openDrawer()}
+    />
+  )
+
   return (
     <View style={{ flex: 1 }}>
+      <Header 
+        placement="left"
+        leftComponent={menuButton} />
+      <View style={{ alignItems: 'center'}}>
+        <Input 
+          onChangeText={text => setSearchWord(text)}
+          value={searchWord} 
+          errorMessage={errorMsg}/>  
+        <Button 
+          containerStyle={{ 
+            marginTop: 10,
+            width: 100
+          }}
+          title='Search'
+          onPress={fetchPoems} />
+      </View>
       <FlatList 
+        style={{ marginTop: 10 }}
         keyExtractor={(item, index) => index.toString()}
         data={poems}
         renderItem={({ item }) => (
@@ -311,16 +351,6 @@ export default function SearchScreen({ navigation }) {
             chevron
             bottomDivider />
         )} />
-
-        {/* validointi lisättävä. Tyhjä syöte laukaisee nyt errorin  */}
-      <Input 
-        onChangeText={text => setSearchWord(text)}
-        value={searchWord} 
-        errorMessage={errorMsg}/>  
-      <Button 
-        title='Search'
-        onPress={fetchPoems} />  
-      {/* <SonnetButton /> */}
       <Button 
         title='Sonnet of the day'
         onPress={saveItem} />

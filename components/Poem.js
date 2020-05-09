@@ -50,7 +50,7 @@ export default function Poem({ route }) {
         [
           poem.title,
           poem.author,
-          utility.turnLinesArrayToString(poem.lines)
+          poem.lines
         ],
         (_, { rows }) => console.log(rows))
     }, error => console.error(error))
