@@ -1,44 +1,63 @@
-import React, { useState, useEffect } from 'react';
-// import { StyleSheet, Text, View, FlatList } from 'react-native';
-// import { Input, Button, ListItem } from 'react-native-elements';
+import React from 'react';
 import { createStackNavigator } from "@react-navigation/stack";
 import { createDrawerNavigator } from '@react-navigation/drawer'
 import { NavigationContainer } from "@react-navigation/native";
-import HomeScreen from './components/HomeScreen';
-import Poem from "./components/Poem";
-import Favorites from './components/Favorites';
+import HomeScreen from './screens/HomeScreen';
+import Poem from "./screens/Poem";
+import FavoritesScreen from './screens/FavoritesScreen';
+import SonnetScreen from './screens/SonnetScreen';
+import { Icon } from 'react-native-elements';
 
 const Stack = createStackNavigator()
 const Drawer = createDrawerNavigator()
 
 export default function App() {
+
+  // Mahdollistaa siirtymisen listauksesta Poem-näkymään 
+  // Syötetään Dwawer.Screeniin children propsina
+  const HomeStack = ({ navigation }) => (
+    <Stack.Navigator>
+      <Stack.Screen 
+        name="Home" 
+        component={HomeScreen} 
+        // menu ikoni headerin vasemmassa reunassa
+        options={{
+          headerLeft: () => (
+            <Icon 
+              name='menu' 
+              onPress={() => navigation.openDrawer()}
+            />
+          )
+        }} />
+      <Stack.Screen name="Poem" component={Poem} />
+    </Stack.Navigator>
+  ) 
+
+  // Stack-navigaatio Favorites-näkymälle
+  const FavoritesStack = ({ navigation }) => (
+    <Stack.Navigator>
+      <Stack.Screen
+        name="Favorites"
+        component={FavoritesScreen}
+        options={{
+          headerLeft: () => (
+            <Icon 
+              name="menu"
+              onPress={() => navigation.openDrawer()}
+            />
+          )
+        }} />
+      <Stack.Screen name="Poem" component={Poem} />
+    </Stack.Navigator>
+  )
+  
   return (
     <NavigationContainer>
       <Drawer.Navigator>
-        <Drawer.Screen name="Home" component={HomeScreen} />
-        <Drawer.Screen name="Poem" component={Poem} />
-        <Drawer.Screen name="Favorites" component={Favorites} />
+        <Drawer.Screen name="Home" children={HomeStack} />
+        <Drawer.Screen name="Sonnet" component={SonnetScreen} />
+        <Drawer.Screen name="Favorites" children={FavoritesStack} />
       </Drawer.Navigator>
     </NavigationContainer>
-    // <NavigationContainer>
-    //   <Stack.Navigator>
-    //     <Stack.Screen name="Home" component={HomeScreen} />
-    //     <Stack.Screen name="Poem" component={Poem} />
-    //     <Stack.Screen name="Favorites" component={Favorites} />
-    //   </Stack.Navigator>
-    // </NavigationContainer>
   )
 }
-
-// export default function App(
-  
-// )
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     backgroundColor: '#fff',
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//   },
-// });
-
