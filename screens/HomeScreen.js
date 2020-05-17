@@ -3,13 +3,11 @@ import { View, FlatList, Keyboard, SafeAreaView, ActivityIndicator } from 'react
 import { Input, Button, ListItem, Header, Icon } from 'react-native-elements';
 import db from "../config";
 import utility from "../utility";
-import { useFocusEffect } from '@react-navigation/native';
+import Search from '../components/Search';
 
 export default function HomeScreen({ navigation }) {
-  const [searchWord, setSearchWord] = useState('')
   const [poems, setPoems] = useState([])
   const [sonnet, setSonnet] = useState(null)
-  const [errorMsg, setErrorMsg] = useState(null)
   const [showActivityIndicator, setShowActivityIndicator] = useState(false)
 
   // luo tietokantaan taulun soneteille, jos sitä ei ole jo olemassa
@@ -94,39 +92,6 @@ export default function HomeScreen({ navigation }) {
   //   setSonnet(randomSonnetWithDate)
   // }
   
-  const fetchPoems = async () => {
-    try {
-      console.log('searching with word: ', searchWord)
-      // asetetaan lataus-kuvake aktiiviseksi
-      setShowActivityIndicator(true)
-      const response = await fetch(`http://poetrydb.org/lines/${searchWord}`)
-      const data = await response.json()
-     
-
-      // jos haku ei löydä mitään, palautuu vastauksena olio jonka status kentän arvo on 404
-      if (data.status === 404) {
-        setShowActivityIndicator(false)
-        setErrorMsg(data.reason)
-        setTimeout(() => {
-          setErrorMsg(null)
-        }, 5000);
-      } else {
-        setPoems(data)
-        // tilan päivityksen jälkeen lataus-kuvake piilotetaan
-        setShowActivityIndicator(false)
-        // piilottaa näppäimistön 
-        Keyboard.dismiss()
-      }
-    } catch (exception) {
-      setErrorMsg('Input not valid')
-      setTimeout(() => {
-        setErrorMsg(null)
-      }, 5000)
-    }
-    // en ole varma, onko pakollinen..
-    setShowActivityIndicator(false)
-  }
-
   // hakee tietokannasta sonetin tiedot ja siirtyy 'Poem' näkymään 
   const navigateToSonnetScreen = () => {
     db.transaction(tx => {
@@ -172,20 +137,13 @@ export default function HomeScreen({ navigation }) {
   // }
   
   return (
-    <View style={{ flex: 1 }}>
-      <View style={{ alignItems: 'center'}}>
-        <Input 
-          onChangeText={text => setSearchWord(text)}
-          value={searchWord} 
-          errorMessage={errorMsg}/>  
-        <Button 
-          containerStyle={{ 
-            marginTop: 10,
-            width: 100
-          }}
-          title='Search'
-          onPress={fetchPoems} />
-      </View>
+    <View style={{
+      flex: 1
+    }}>
+      <Search
+        setPoems={setPoems}
+        setShowActivityIndicator={setShowActivityIndicator}
+      />
       {/* Näyttää lataus kuvakkeen sen aikaa, kun tietoa noudetaan */}
       {
         showActivityIndicator ?
@@ -193,13 +151,13 @@ export default function HomeScreen({ navigation }) {
           : <FlatList 
               style={{ marginTop: 10 }}
               keyExtractor={(item, index) => index.toString()}
-              data={poems}
+              data={utility.sortPoemsByTitle(poems)}
               renderItem={({ item }) => (
                 <ListItem 
                   onPress={() => navigation.navigate('Poem', {
                     title: item.title,
                     author: item.author,
-                    lines: item.lines
+                    lines: utility.turnLinesArrayToString(item.lines)
                   })}
                   title={item.title}
                   chevron

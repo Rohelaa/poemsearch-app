@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useLayoutEffect } from 'react'
 import { Text, View, StyleSheet, Alert } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
-import { Button, Icon } from 'react-native-elements'
+import { Button, Icon, Card } from 'react-native-elements'
 import db from '../config'
 
-export default function Poem({ route }) {
+export default function PoemScreen({ route, navigation }) {
   const [poem, setPoem] = useState(route.params)
   const [favoriteTitles, setFavoriteTitles] = useState([])
 
@@ -22,6 +22,23 @@ export default function Poem({ route }) {
     getFavorites()
   }, [])
 
+  useLayoutEffect(() => {
+    if (!(favoriteTitles.includes(poem.title))) {
+      navigation.setOptions({
+        headerRight: () => (
+          <Icon 
+            containerStyle={{
+              right: 10
+            }}
+            name="favorite"
+            onPress={addToFavorites}
+          />
+        )
+      }) 
+    }
+    
+  }, [navigation])
+
   // tietokannan tyhjennys
 
   // db.transaction(tx => {
@@ -29,14 +46,6 @@ export default function Poem({ route }) {
   //     console.log(rows)
   //   })
   // })
-
-  // kokeilua...
-  // const reducer = (accumulator, currentValue, currentIndex) => {
-  //   // console.log(accumulator)
-  //   return (
-  //     accumulator + currentValue
-  //   )
-  // }
 
   const getFavorites = () => {
     db.transaction(tx => {
@@ -64,12 +73,15 @@ export default function Poem({ route }) {
     () => {
       setFavoriteTitles(favoriteTitles.concat(poem.title))
       Alert.alert('Poem was added to favorites!')
-    }
-    )
+    })
   }
 
   return (
-    <ScrollView style={styles.container}>  
+    <ScrollView style={styles.container}
+      contentContainerStyle={{
+        alignItems: 'center'
+      }}
+    >  
     {/* Jos runo löytyy jo suosikeista, renderöidään null eli ei mitään. Muuten renderöidään 
         suosikkipainike */}
       {
@@ -84,18 +96,18 @@ export default function Poem({ route }) {
               }}
             />
       }
-      <Text onPress={() => console.log('HELLO!')} style={{ fontSize: 20 }}>{poem.title}</Text>
+      <Text style={{ fontSize: 20 }}>{poem.title}</Text>
       <Text>{poem.author}</Text>
-      {/* <Text>{poem.lines}</Text> */}
+      <Card>
+        <Text>{poem.lines}</Text>
+      </Card>
       <Text>{poem.date}</Text>
-      
     </ScrollView>
   )
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1
-  },
-  
+    flex: 1,
+  }
 })

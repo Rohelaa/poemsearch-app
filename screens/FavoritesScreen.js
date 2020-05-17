@@ -9,7 +9,7 @@ import {
   View,
 } from 'react-native'
 import { SwipeListView } from 'react-native-swipe-list-view'
-import Poem from './Poem'
+import Poem from './PoemScreen'
 import { useFocusEffect } from '@react-navigation/native'
 
 export default function FavoritesScreen({ navigation }) {
