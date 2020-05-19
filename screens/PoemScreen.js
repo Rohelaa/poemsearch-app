@@ -12,7 +12,7 @@ export default function PoemScreen({ route, navigation }) {
   // luo tietokantaan taulun suosikeille
   useEffect(() => {
     db.transaction(tx => {
-      tx.executeSql(`create table if not exists favorite
+      tx.executeSql(`CREATE TABLE IF NOT EXIST favorite
         (id integer primary key not null, title text, author text, lines text)`)
     }, null,
     )
@@ -22,11 +22,16 @@ export default function PoemScreen({ route, navigation }) {
     getFavorites()
   }, [])
 
+  // vaikuttaa toimivan
+  // hook saa aikaan sydän-ikonin valikkopalkkiin
+  // pitäisi näkyä vain silloin, jos runo ei löydy suosikeista
+  // hyödynnetään navigationin setOptions proppia
   useLayoutEffect(() => {
-    if (!(favoriteTitles.includes(poem.title))) {
+    if (!favoriteTitles.includes(poem.title)) {
       navigation.setOptions({
         headerRight: () => (
           <Icon 
+            color="red"
             containerStyle={{
               right: 10
             }}
@@ -35,9 +40,14 @@ export default function PoemScreen({ route, navigation }) {
           />
         )
       }) 
+    } else {
+      navigation.setOptions({
+        headerRight: () => {
+          null
+        }
+      })
     }
-    
-  }, [navigation])
+  })
 
   // tietokannan tyhjennys
 
@@ -77,25 +87,12 @@ export default function PoemScreen({ route, navigation }) {
   }
 
   return (
-    <ScrollView style={styles.container}
+    <ScrollView 
+      style={styles.container}
       contentContainerStyle={{
         alignItems: 'center'
       }}
     >  
-    {/* Jos runo löytyy jo suosikeista, renderöidään null eli ei mitään. Muuten renderöidään 
-        suosikkipainike */}
-      {
-        favoriteTitles.includes(poem.title) ?
-          null
-          : <Icon 
-              onPress={addToFavorites}
-              name='favorite'
-              size={30}
-              iconStyle={{
-                color: 'red'
-              }}
-            />
-      }
       <Text style={{ fontSize: 20 }}>{poem.title}</Text>
       <Text>{poem.author}</Text>
       <Card>

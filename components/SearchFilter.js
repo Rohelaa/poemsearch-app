@@ -1,5 +1,5 @@
 import { Icon } from "react-native-elements";
-import React, { useState } from 'react'
+import React, { useState, useImperativeHandle } from 'react'
 import { View } from "react-native";
 import RadioForm, { 
   RadioButton, 
@@ -13,17 +13,29 @@ const radio_props = [
   { label: 'Author', value: 'author' }
 ]
 
-export default function SearchFilter({
-  handleSearchFilterChange
-}) {
+// funktio kääritty funktiokutsun forwardRef sisälle
+// tällä tavoin komponentti pääsee käsiksi sille määritettyyn refiin
+const SearchFilter = React.forwardRef(({ handleSearchFilterChange }, ref) => {
   const [showFilters, setShowFilters] = useState(false)
+
+  const hideFilters = () => {
+    setShowFilters(false)
+  }
+
+  // hookin avulla komponentin funktioita pystytään kutsua tämän ulkopuolella muissa komponenteissa
+  useImperativeHandle(ref, () => {
+    return {
+      hideFilters
+    }
+  })
 
   return (
     <View>
       <Icon
         onPress={() => setShowFilters(!showFilters)} 
-        name='tune'
+        name="tune"
       />
+      {/* Ehdollinen renderöinti. Määrittää näkyvätkö haun suodatusasetukset */}
       {
         showFilters ?
           <View>
@@ -37,4 +49,6 @@ export default function SearchFilter({
       }
     </View>
   )
-}
+})
+
+export default SearchFilter

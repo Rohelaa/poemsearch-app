@@ -28,6 +28,9 @@ export default function App() {
             <Icon 
               name='menu' 
               onPress={() => navigation.toggleDrawer()}
+              containerStyle={{
+                left: 10
+              }}
             />
           )
         }} />
@@ -46,6 +49,9 @@ export default function App() {
             <Icon 
               name="menu"
               onPress={() => navigation.toggleDrawer()}
+              containerStyle={{
+                left: 10
+              }}
             />
           )
         }} />
@@ -63,6 +69,9 @@ export default function App() {
             <Icon 
               name="menu"
               onPress={() => navigation.toggleDrawer()}
+              containerStyle={{
+                left: 10
+              }}
             />
           )
         }}

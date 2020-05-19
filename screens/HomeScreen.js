@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { View, FlatList, Keyboard, SafeAreaView, ActivityIndicator } from 'react-native';
-import { Input, Button, ListItem, Header, Icon } from 'react-native-elements';
+import React, { useState, useEffect } from 'react';
+import { View, FlatList, ActivityIndicator } from 'react-native';
+import { ListItem } from 'react-native-elements';
 import db from "../config";
 import utility from "../utility";
 import Search from '../components/Search';
@@ -13,7 +13,7 @@ export default function HomeScreen({ navigation }) {
   // luo tietokantaan taulun soneteille, jos sitä ei ole jo olemassa
   useEffect(() => {
     db.transaction(tx => {
-      tx.executeSql(`create table if not exists sonnet 
+      tx.executeSql(`CREATE TABLE IF NOT EXIST sonnet 
         (id integer primary key not null, title text, author text, lines text, date text)`)
     })
   }, [])
@@ -21,15 +21,7 @@ export default function HomeScreen({ navigation }) {
   // luo tietokantaan taulun suosikeille
   useEffect(() => {
     db.transaction(tx => {
-      tx.executeSql(`create table if not exists favorite
-        (id integer primary key not null, title text, author text, lines text)`)
-    }, err => console.error(err))
-  }, [])
-
-  // luo tietokantaan taulun suosikeille
-  useEffect(() => {
-    db.transaction(tx => {
-      tx.executeSql(`create table if not exists favorite
+      tx.executeSql(`CREATE TABLE IF NOT EXISTS favorite
         (id integer primary key not null, title text, author text, lines text)`)
     }, err => console.error(err))
   }, [])
@@ -93,18 +85,18 @@ export default function HomeScreen({ navigation }) {
   // }
   
   // hakee tietokannasta sonetin tiedot ja siirtyy 'Poem' näkymään 
-  const navigateToSonnetScreen = () => {
-    db.transaction(tx => {
-      tx.executeSql('select * from sonnet', [], (_,{ rows }) => {
-        navigation.navigate('Poem', {
-          title: rows._array[0].title,
-          author: rows._array[0].author,
-          lines: rows._array[0].lines,
-          date: rows._array[0].date
-        })
-      })
-    })
-  }
+  // const navigateToSonnetScreen = () => {
+  //   db.transaction(tx => {
+  //     tx.executeSql('select * from sonnet', [], (_,{ rows }) => {
+  //       navigation.navigate('Poem', {
+  //         title: rows._array[0].title,
+  //         author: rows._array[0].author,
+  //         lines: rows._array[0].lines,
+  //         date: rows._array[0].date
+  //       })
+  //     })
+  //   })
+  // }
 
   /* poistaa tietokannassa olevan sonetin ja korvaa sen toisella
   nyt tekee edellämainitun, vaikka poistoa ei tarvitsisi tehdä */
@@ -137,34 +129,36 @@ export default function HomeScreen({ navigation }) {
   // }
   
   return (
-    <View style={{
-      flex: 1
-    }}>
+    <View style={{ flex: 1 }}>
       <Search
         setPoems={setPoems}
         setShowActivityIndicator={setShowActivityIndicator}
+        showActivityIndicator={showActivityIndicator}
       />
       {/* Näyttää lataus kuvakkeen sen aikaa, kun tietoa noudetaan */}
       {
         showActivityIndicator ?
           <ActivityIndicator size='large' />
-          : <FlatList 
-              style={{ marginTop: 10 }}
-              keyExtractor={(item, index) => index.toString()}
-              data={utility.sortPoemsByTitle(poems)}
-              renderItem={({ item }) => (
-                <ListItem 
-                  onPress={() => navigation.navigate('Poem', {
-                    title: item.title,
-                    author: item.author,
-                    lines: utility.turnLinesArrayToString(item.lines)
-                  })}
-                  title={item.title}
-                  chevron
-                  bottomDivider
-                />
-              )} 
-            />
+          : <View>
+              {/* <Text>Results: {poems.length}</Text> */}
+              <FlatList 
+                style={{ marginTop: 10 }}
+                keyExtractor={(item, index) => index.toString()}
+                data={utility.sortPoemsByTitle(poems)}
+                renderItem={({ item }) => (
+                  <ListItem 
+                    onPress={() => navigation.navigate('Poem', {
+                      title: item.title,
+                      author: item.author,
+                      lines: utility.turnLinesArrayToString(item.lines)
+                    })}
+                    title={item.title}
+                    chevron
+                    bottomDivider
+                  />
+                )} 
+              />
+            </View>
       }
     </View>
   );

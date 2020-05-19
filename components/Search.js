@@ -3,24 +3,24 @@ import { View, Keyboard } from "react-native"
 import { Input, Button } from "react-native-elements"
 import SearchFilter from "./SearchFilter"
 
-export default function Search({
-  setPoems,
-  setShowActivityIndicator
-}) {
 
-  console.log(setShowActivityIndicator);
-  
+
+export default function Search({ setPoems, setShowActivityIndicator, showActivityIndicator }) {
   const [searchWord, setSearchWord] = useState('')
   const [searchFilter, setSearchFilter] = useState('title')
+  // näkyy, jos hakusanalla ei löydy tuloksia tai hakukenttä jää tyhjäksi
   const [errorMsg, setErrorMsg] = useState(null)
-  
+ 
+  // luodaan ref (viite?)
+  // tämän avulla päästään käsiksi toisen komponentin funktioihin
+  // tässä tapauksessa SearchFilter-komponentin 
+  const searchRef = React.createRef()
+
   const fetchPoems = async () => {
     try {
-      console.log('searching with word: ', searchWord)
-      console.log('seaching with filter: ', searchFilter);
-      
       // asetetaan lataus-kuvake aktiiviseksi
       setShowActivityIndicator(true)
+      searchRef.current.hideFilters()
       const response = await fetch(`http://poetrydb.org/${searchFilter}/${searchWord}`)
       const data = await response.json()
      
@@ -43,7 +43,7 @@ export default function Search({
         setErrorMsg(null)
       }, 5000)
     }
-    // en ole varma, onko pakollinen..
+    // piilottaa lataus-animaation
     setShowActivityIndicator(false)
   }
 
@@ -61,8 +61,11 @@ export default function Search({
           }}
           title='Search'
           onPress={fetchPoems} />
+          {/* muuttuja searchRef toimii viitteenä */}
         <SearchFilter 
+          ref={searchRef}
           handleSearchFilterChange={(value) => setSearchFilter(value)} 
+          showActivityIndicator={showActivityIndicator}
         />
       </View>
     </View>

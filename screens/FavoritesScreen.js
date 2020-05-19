@@ -1,24 +1,14 @@
 import db from '../config'
-import { ListItem, Icon } from 'react-native-elements'
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   StyleSheet,
-  Text,
-  TouchableOpacity,
-  TouchableHighlight,
   View,
 } from 'react-native'
-import { SwipeListView } from 'react-native-swipe-list-view'
-import Poem from './PoemScreen'
-import { useFocusEffect } from '@react-navigation/native'
+import SwipableList from '../components/SwipableList'
 
 export default function FavoritesScreen({ navigation }) {
   const [favorites, setFavorites] = useState(null)
-
-  // useEffect(() => {
-  //   getFavorites()
-  // }, [])
-
+  
   // päivittää suosikkinäkymän aina, kun näkymään navigoidaan
   useEffect(() => {
     navigation.addListener('focus', () => {
@@ -26,46 +16,13 @@ export default function FavoritesScreen({ navigation }) {
     })
   })
 
-  // hook, joka aktivoituu aina näkymään siirtyessä
-  // useCallBack-hook oltava myös
-  // useFocusEffect(
-  //   useCallback(() => getFavorites())
-  // )
-
-  // Parametrina data 
-  // voisi olla myös { item }
-  const renderItem_ = (data) => (
-    <ListItem 
-      title={data.item.title}
-      subtitle={data.item.author}
-      // onPress={() => navigation.navigate('Poem', {
-      //   title: data.item.title,
-      //   author: data.item.author,
-      //   lines: data.item.lines,
-      //   favorite: true
-      // })} 
-      chevron 
-      bottomDivider 
-    />
-  )
-
-  // Swaipattava osa
-  const renderItem = ({ item }) => (
-    <TouchableHighlight
-      style={styles.rowFront}
-      underlayColor={'#AAA'}
-      onPress={() => navigation.navigate('Poem', {
-        title: item.title,
-        author: item.author,
-        lines: item.lines,
-        favorite: true
-      })}
-    >
-      <View>
-        <Text>{item.title}</Text>
-      </View>
-    </TouchableHighlight>
-  )
+  const navigateToPoem = (item) => {
+    navigation.navigate('Poem', {
+      title: item.title,
+      author: item.author,
+      lines: item.lines
+    })
+  }
 
   // poistaa runon tietokannan taulukosta favorite
   // onnistunut poistaminen johtaa funktion getFavorites kutsuun, mikä
@@ -81,29 +38,6 @@ export default function FavoritesScreen({ navigation }) {
   const updateFavorites = item_id => {
     setFavorites(favorites.filter(f => f.id !== item_id))
   }
-
-  // Swaippauksen paljastama sisältö
-  const renderHiddenItem = (data, rowMap) => (
-    <View style={styles.rowBack}>
-      <TouchableOpacity 
-        style={
-          [styles.backRightBtn, 
-          styles.backRightBtnRight]
-        }
-        onPress={() => {
-          deleteFromFavorites(data.item.id)
-          console.log('item id: ', data.item.id)
-        }}
-      >
-        <View>
-          <Icon 
-            name='delete'
-            color='white'
-          /> 
-        </View>
-      </TouchableOpacity>
-    </View>
-  )
 
   // näyttää konsolissa swaipatun osan propertyn 'key'
   const onRowDidOpen = rowKey => {
@@ -124,15 +58,10 @@ export default function FavoritesScreen({ navigation }) {
   
   return (
     <View style={styles.container}>
-      <SwipeListView 
+      <SwipableList 
         data={favorites}
-        renderItem={renderItem}
-        renderHiddenItem={renderHiddenItem}
-        rightOpenValue={-75}
-        previewRowKey={'0'}
-        previewOpenValue={-40}
-        previewOpenDelay={3000}
-        onRowDidOpen={onRowDidOpen}
+        navigateToPoem={navigateToPoem}
+        handleDelete={deleteFromFavorites}
       />
     </View>
   )
@@ -141,36 +70,5 @@ export default function FavoritesScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
       flex: 1,
-  },
-  backTextWhite: {
-      color: '#FFF',
-  },
-  rowFront: {
-      alignItems: 'center',
-      backgroundColor: '#CCC',
-      borderBottomColor: 'black',
-      borderBottomWidth: 1,
-      justifyContent: 'center',
-      height: 50,
-  },
-  rowBack: {
-      alignItems: 'center',
-      backgroundColor: '#DDD',
-      flex: 1,
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      paddingLeft: 15,
-  },
-  backRightBtn: {
-      alignItems: 'center',
-      bottom: 0,
-      justifyContent: 'center',
-      position: 'absolute',
-      top: 0,
-      width: 75,
-  },
-  backRightBtnRight: {
-      backgroundColor: 'red',
-      right: 0,
-  },
-});
+  }
+})

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
-import { Button, ListItem } from 'react-native-elements'
-import { View, FlatList, Text } from 'react-native'
+import { ListItem } from 'react-native-elements'
+import { View, FlatList } from 'react-native'
+
 export default function BrowseScreen({ navigation }) {
   const [authors, setAuthors] = useState([])
 

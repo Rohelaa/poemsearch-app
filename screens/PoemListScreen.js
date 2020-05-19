@@ -5,7 +5,6 @@ import util from '../utility'
 
 export default function PoemListScreen({ route, navigation }) {
   const author = route.params.author
-  
   const [poems, setPoems] = useState([])
 
   useEffect(() => {
