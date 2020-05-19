@@ -54,8 +54,8 @@ export default function Search({ setPoems, setShowActivityIndicator, showActivit
         <Input 
           placeholder={
             searchFilter === 'lines' ? 
-              'Search by keyword' 
-              : `Search by ${searchFilter}`
+              'Search poems by keyword' 
+              : `Search poems by ${searchFilter}`
           }
           onChangeText={text => setSearchWord(text)}
           value={searchWord} 
