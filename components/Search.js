@@ -3,8 +3,6 @@ import { View, Keyboard } from "react-native"
 import { Input, Button } from "react-native-elements"
 import SearchFilter from "./SearchFilter"
 
-
-
 export default function Search({ setPoems, setShowActivityIndicator, showActivityIndicator }) {
   const [searchWord, setSearchWord] = useState('')
   const [searchFilter, setSearchFilter] = useState('title')
@@ -19,6 +17,8 @@ export default function Search({ setPoems, setShowActivityIndicator, showActivit
   const fetchPoems = async () => {
     try {
       // asetetaan lataus-kuvake aktiiviseksi
+      console.log(searchWord)
+      console.log(searchFilter)
       setShowActivityIndicator(true)
       searchRef.current.hideFilters()
       const response = await fetch(`http://poetrydb.org/${searchFilter}/${searchWord}`)
@@ -27,6 +27,7 @@ export default function Search({ setPoems, setShowActivityIndicator, showActivit
       // jos haku ei löydä mitään, palautuu vastauksena olio jonka status kentän arvo on 404
       if (data.status === 404) {
         setErrorMsg(data.reason)
+        setSearchFilter('title')
         setTimeout(() => {
           setErrorMsg(null)
         }, 5000)
@@ -51,6 +52,11 @@ export default function Search({ setPoems, setShowActivityIndicator, showActivit
     <View>
       <View style={{ alignItems: 'center'}}>
         <Input 
+          placeholder={
+            searchFilter === 'lines' ? 
+              'Search by keyword' 
+              : `Search by ${searchFilter}`
+          }
           onChangeText={text => setSearchWord(text)}
           value={searchWord} 
           errorMessage={errorMsg}/>  
@@ -63,6 +69,7 @@ export default function Search({ setPoems, setShowActivityIndicator, showActivit
           onPress={fetchPoems} />
           {/* muuttuja searchRef toimii viitteenä */}
         <SearchFilter 
+          searchFilter={searchFilter}
           ref={searchRef}
           handleSearchFilterChange={(value) => setSearchFilter(value)} 
           showActivityIndicator={showActivityIndicator}

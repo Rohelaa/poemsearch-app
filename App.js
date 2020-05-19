@@ -5,7 +5,6 @@ import { NavigationContainer } from "@react-navigation/native";
 import HomeScreen from './screens/HomeScreen';
 import Poem from "./screens/PoemScreen";
 import FavoritesScreen from './screens/FavoritesScreen';
-import SonnetScreen from './screens/SonnetScreen';
 import { Icon } from 'react-native-elements';
 import BrowseScreen from './screens/BrowseScreen';
 import PoemListScreen from './screens/PoemListScreen';
@@ -87,7 +86,6 @@ export default function App() {
     <NavigationContainer>
       <Drawer.Navigator>
         <Drawer.Screen name="Home" children={HomeStack} />
-        <Drawer.Screen name="Sonnet" component={SonnetScreen} />
         <Drawer.Screen name="Favorites" children={FavoritesStack} />
         <Drawer.Screen name="Browse" children={BrowseStack} />
       </Drawer.Navigator>

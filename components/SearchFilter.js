@@ -15,7 +15,7 @@ const radio_props = [
 
 // funktio kääritty funktiokutsun forwardRef sisälle
 // tällä tavoin komponentti pääsee käsiksi sille määritettyyn refiin
-const SearchFilter = React.forwardRef(({ handleSearchFilterChange }, ref) => {
+const SearchFilter = React.forwardRef(({ handleSearchFilterChange, searchFilter }, ref) => {
   const [showFilters, setShowFilters] = useState(false)
 
   const hideFilters = () => {
@@ -39,11 +39,25 @@ const SearchFilter = React.forwardRef(({ handleSearchFilterChange }, ref) => {
       {
         showFilters ?
           <View>
-            <RadioForm 
-              radio_props={radio_props}
-              initial={0}
-              onPress={handleSearchFilterChange}
-            />
+            <RadioForm>
+              {
+                radio_props.map((obj, i) => (
+                  <RadioButton key={i}>
+                    <RadioButtonInput 
+                      isSelected={searchFilter === obj.value}
+                      obj={obj}
+                      index={i}
+                      onPress={handleSearchFilterChange}
+                    />
+                    <RadioButtonLabel
+                      obj={obj}
+                      index={i}
+                      onPress={handleSearchFilterChange}
+                    />
+                  </RadioButton>
+                ))
+              }
+            </RadioForm>
           </View>
           : null
       }
